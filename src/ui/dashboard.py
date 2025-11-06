@@ -1,8 +1,35 @@
-class Dashboard:
-    def __init__(self, wins=0, losses=0):
-        self.wins = wins
-        self.losses = losses
+import tkinter as tk
 
-    def win_rate(self):
-        total = self.wins + self.losses
-        return round((self.wins / total) * 100) if total > 0 else 0
+class Dashboard(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent, bg="#1e1e1e", padx=15, pady=15)
+        self.parent = parent
+
+        # 🎯 KPI simulés
+        self.kpis = {
+            "Taux de gain": "68%",
+            "Mises totales": "2 450 €",
+            "Parties jouées": "128",
+            "Dernier gain": "75 €"
+        }
+
+        tk.Label(
+            self,
+            text="📊 Tableau de bord",
+            font=("Arial", 14, "bold"),
+            fg="white",
+            bg="#1e1e1e"
+        ).pack(anchor="w", pady=(0, 10))
+
+        # Affichage des KPI sous forme de lignes
+        for name, value in self.kpis.items():
+            frame = tk.Frame(self, bg="#1e1e1e")
+            frame.pack(anchor="w", pady=3)
+
+            tk.Label(
+                frame, text=f"{name} :", fg="white", bg="#1e1e1e", font=("Arial", 11)
+            ).pack(side="left")
+
+            tk.Label(
+                frame, text=value, fg="#00ff99", bg="#1e1e1e", font=("Arial", 11, "bold")
+            ).pack(side="left", padx=10)

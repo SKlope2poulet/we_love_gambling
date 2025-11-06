@@ -1,67 +1,70 @@
 import tkinter as tk
-from src.ui.recharge_button import RechargeButton
-from src.ui.game_list import GameList
 from src.ui.navbar import Navbar
-from src.ui.rules_page import RulesPage
-
-def create_homepage():
-    """Fonction minimale pour valider les tests unitaires TDD"""
-    return {"navigation": True, "games": []}
+from src.ui.balance_display import BalanceDisplay
+from src.ui.portfolio import Portfolio
+from src.ui.dashboard import Dashboard
+from src.ui.fake_money_warning import FakeMoneyWarning
+from src.ui.legal_popup import LegalPopup
+from src.ui.age_verification import AgeVerification
+from src.ui.game_list import GameList
+from src.ui.recharge_button import RechargeButton
 
 class HomePage(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("We Love Gambling 🎰")
-        self.geometry("600x400")
-        self.config(bg="#1e1e1e")
+        self.geometry("1200x700")
+        self.configure(bg="#1a1a1a")
 
-        # Barre de navigation
-        self.navbar = Navbar()
-        nav_frame = tk.Frame(self, bg="#2e2e2e", height=40)
-        nav_frame.pack(fill="x")
-        for link in self.navbar.links:
-            tk.Label(nav_frame, text=link, fg="white", bg="#2e2e2e", padx=10).pack(side="left")
+        # ⚠️ Supprime tout double appel ici
+        # Afficher la vérification d'âge une seule fois :
+        self.has_verified_age = False
+        self.after(100, self.show_age_verification)
 
-        # Zone principale
-        main_frame = tk.Frame(self, bg="#1e1e1e")
-        main_frame.pack(expand=True, fill="both", pady=20)
+    def show_age_verification(self):
+        if not self.has_verified_age:
+            self.has_verified_age = True
+            AgeVerification(self, on_confirm=self.launch_app)
 
-        # Liste des jeux
-        self.game_list = GameList()
-        tk.Label(
-            main_frame,
-            text="🎮 Liste des jeux disponibles :",
-            fg="white",
-            bg="#1e1e1e",
-            font=("Arial", 14, "bold")
-        ).pack(pady=10)
+    def launch_app(self):
+        """Lance la page d'accueil après vérification d'âge."""
+        self.clear_window()
 
-        for game in self.game_list.games:
-            tk.Button(
-                main_frame,
-                text=game,
-                bg="#444",
-                fg="white",
-                width=20,
-                command=lambda g=game: self.show_rules(g)
-            ).pack(pady=5)
+        # 🧱 Navbar
+        self.navbar = Navbar(self)
+        self.navbar.pack(fill="x", pady=5)
 
-        # Bouton Recharger le solde
-        btn = RechargeButton()
-        tk.Button(main_frame, text=btn.label, bg="#28a745", fg="white", width=25).pack(pady=20)
+        # 🧾 Solde fictif
+        self.balance = BalanceDisplay(self)
+        self.balance.pack(pady=10)
 
-    def show_rules(self, game_name):
-        rules = RulesPage(game_name)
-        popup = tk.Toplevel(self)
-        popup.title(f"Règles du jeu : {game_name}")
-        popup.geometry("400x300")
-        tk.Label(
-            popup,
-            text=rules.get_rules(),
-            wraplength=350,
-            fg="black",
-            bg="white"
-        ).pack(expand=True, fill="both", padx=20, pady=20)
+        # 💳 Portefeuille (dépôt/retrait)
+        self.portfolio = Portfolio(self)
+        self.portfolio.pack(pady=10)
+
+        # 🔄 Bouton Recharger
+        self.recharge = RechargeButton(self)
+        self.recharge.pack(pady=10)
+
+        # 📊 Tableau de bord (KPI)
+        self.dashboard = Dashboard(self)
+        self.dashboard.pack(pady=10)
+
+        # 🎮 Liste des jeux
+        self.games = GameList(self)
+        self.games.pack(pady=10)
+
+        # ⚖️ CGU / politique confidentialité
+        self.legal = LegalPopup(self)
+
+        # 💬 Avertissement "Argent fictif"
+        self.fake_money_warning = FakeMoneyWarning(self)
+        self.fake_money_warning.pack(pady=5)
+
+    def clear_window(self):
+        """Efface tous les widgets pour relancer proprement."""
+        for widget in self.winfo_children():
+            widget.destroy()
 
 
 if __name__ == "__main__":
