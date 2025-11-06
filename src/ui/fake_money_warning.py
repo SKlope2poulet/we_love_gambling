@@ -1,16 +1,38 @@
 import tkinter as tk
+from tkinter import messagebox
 
-class FakeMoneyWarning(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent, bg="#1e1e1e", padx=10, pady=10)
-        self.parent = parent
+class FakeMoneyWarning(tk.Toplevel):
+    """Popup avertissant que le site utilise de l'argent fictif."""
+
+    def __init__(self, parent, on_confirm=None):
+        super().__init__(parent)
+        self.title("⚠️ Avertissement")
+        self.geometry("400x250")
+        self.configure(bg="#1e1e1e")
+        self.on_confirm = on_confirm
 
         tk.Label(
             self,
-            text="⚠️ Argent fictif – aucune mise réelle. Jouez pour le plaisir !",
-            fg="#ffcc00",
+            text="💸 ATTENTION : Ce site utilise uniquement de l'argent fictif !\n"
+                 "Aucune mise réelle, aucun gain réel.",
+            fg="white",
             bg="#1e1e1e",
-            font=("Arial", 11, "bold"),
-            wraplength=800,
-            justify="center"
-        ).pack()
+            wraplength=350,
+            justify="center",
+            font=("Arial", 12, "bold")
+        ).pack(expand=True, pady=20, padx=10)
+
+        tk.Button(
+            self,
+            text="Je comprends",
+            bg="#28a745",
+            fg="white",
+            command=self.confirm,
+            width=20
+        ).pack(pady=10)
+
+    def confirm(self):
+        """Ferme la fenêtre et passe à l'étape suivante."""
+        self.destroy()
+        if self.on_confirm:
+            self.on_confirm()

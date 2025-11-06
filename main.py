@@ -1,72 +1,134 @@
 import tkinter as tk
 from src.ui.navbar import Navbar
-from src.ui.balance_display import BalanceDisplay
-from src.ui.portfolio import Portfolio
 from src.ui.dashboard import Dashboard
-from src.ui.fake_money_warning import FakeMoneyWarning
-from src.ui.legal_popup import LegalPopup
-from src.ui.age_verification import AgeVerification
-from src.ui.game_list import GameList
+from src.ui.portfolio import Portfolio
 from src.ui.recharge_button import RechargeButton
+from src.ui.game_list import GameList
+from src.ui.rules_page import RulesPage
+from src.ui.fake_money_warning import FakeMoneyWarning
+from src.ui.age_verification import AgeVerification
+from src.ui.legal_popup import LegalPopup
+
+# Essayer d’importer Plinko
+try:
+    from src.games.plinko import PlinkoWindow
+except ImportError:
+    PlinkoWindow = None
+
+
+def create_homepage():
+    """Fonction minimale pour les tests unitaires TDD"""
+    return {"navigation": True, "games": []}
+
 
 class HomePage(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("We Love Gambling 🎰")
-        self.geometry("1200x700")
-        self.configure(bg="#1a1a1a")
+        self.geometry("900x600")
+        self.config(bg="#1e1e1e")
 
-        # ⚠️ Supprime tout double appel ici
-        # Afficher la vérification d'âge une seule fois :
-        self.has_verified_age = False
-        self.after(100, self.show_age_verification)
-
-    def show_age_verification(self):
-        if not self.has_verified_age:
-            self.has_verified_age = True
-            AgeVerification(self, on_confirm=self.launch_app)
-
-    def launch_app(self):
-        """Lance la page d'accueil après vérification d'âge."""
-        self.clear_window()
-
-        # 🧱 Navbar
+        # --- NAVBAR ---
         self.navbar = Navbar(self)
-        self.navbar.pack(fill="x", pady=5)
+        nav_frame = tk.Frame(self, bg="#2e2e2e", height=40)
+        nav_frame.pack(fill="x")
+        for link in self.navbar.links:
+            tk.Label(
+                nav_frame, text=link, fg="white", bg="#2e2e2e", padx=10
+            ).pack(side="left")
 
-        # 🧾 Solde fictif
-        self.balance = BalanceDisplay(self)
-        self.balance.pack(pady=10)
-
-        # 💳 Portefeuille (dépôt/retrait)
-        self.portfolio = Portfolio(self)
-        self.portfolio.pack(pady=10)
-
-        # 🔄 Bouton Recharger
-        self.recharge = RechargeButton(self)
-        self.recharge.pack(pady=10)
-
-        # 📊 Tableau de bord (KPI)
+        # --- DASHBOARD ---
         self.dashboard = Dashboard(self)
         self.dashboard.pack(pady=10)
 
-        # 🎮 Liste des jeux
-        self.games = GameList(self)
-        self.games.pack(pady=10)
+        # --- PORTFOLIO ---
+        self.portfolio = Portfolio(self)
+        self.portfolio.pack(pady=10)
 
-        # ⚖️ CGU / politique confidentialité
+        # --- RECHARGE BUTTON ---
+        self.recharge_button = RechargeButton(self)
+        tk.Button(
+            self,
+            text=self.recharge_button.label,
+            bg="#28a745",
+            fg="white",
+            width=25,
+            command=self.recharge_button.recharge,
+        ).pack(pady=10)
+
+        # --- LISTE DES JEUX ---
+        self.game_list = GameList(self)
+        tk.Label(
+            self,
+            text="🎮 Liste des jeux disponibles :",
+            fg="white",
+            bg="#1e1e1e",
+            font=("Arial", 14, "bold"),
+        ).pack(pady=10)
+
+        for game in self.game_list.games:
+            tk.Button(
+                self,
+                text=game,
+                bg="#444",
+                fg="white",
+                width=20,
+                command=lambda g=game: self.open_game(g),
+            ).pack(pady=5)
+
+        # --- CGU / Politique de confidentialité ---
         self.legal = LegalPopup(self)
+        tk.Button(
+            self,
+            text="📜 Consulter les CGU / Politique de confidentialité",
+            bg="#555",
+            fg="white",
+            width=40,
+            command=self.legal.show_popup,
+        ).pack(pady=20)
 
-        # 💬 Avertissement "Argent fictif"
-        self.fake_money_warning = FakeMoneyWarning(self)
-        self.fake_money_warning.pack(pady=5)
+    # --- MÉTHODES PRINCIPALES ---
+    def open_game(self, game_name):
+        """Ouvre le jeu choisi."""
+        if "plinko" in game_name.lower() and PlinkoWindow:
+            # On transmet le portefeuille pour synchroniser le solde
+            PlinkoWindow(self, portfolio=self.portfolio)
+        else:
+            self.show_rules(game_name)
 
-    def clear_window(self):
-        """Efface tous les widgets pour relancer proprement."""
-        for widget in self.winfo_children():
-            widget.destroy()
+    def show_rules(self, game_name):
+        """Affiche les règles du jeu."""
+        rules = RulesPage(game_name)
+        popup = tk.Toplevel(self)
+        popup.title(f"Règles du jeu : {game_name}")
+        popup.geometry("400x300")
+        tk.Label(
+            popup,
+            text=rules.get_rules(),
+            wraplength=350,
+            fg="black",
+            bg="white",
+        ).pack(expand=True, fill="both", padx=20, pady=20)
+
+
+def launch_app():
+    """Démarre l’application avec avertissement et vérification d’âge."""
+    root = tk.Tk()
+    root.withdraw()  # on cache la fenêtre vide de Tkinter
+
+    # Étape 1 : avertissement argent fictif
+    def after_warning():
+        # Étape 2 : vérification d’âge
+        def after_age_verification():
+            # Étape 3 : lancement de la vraie app
+            app = HomePage()
+            app.mainloop()
+
+        AgeVerification(root, on_confirm=after_age_verification)
+
+    FakeMoneyWarning(root, on_confirm=after_warning)
+    root.mainloop()
 
 
 if __name__ == "__main__":
-    app = HomePage()
-    app.mainloop()
+    launch_app()
