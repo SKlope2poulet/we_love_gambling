@@ -1,4 +1,5 @@
 import tkinter as tk
+from src.games.roulette import RouletteApp
 from src.ui.navbar import Navbar
 from src.ui.dashboard import Dashboard
 from src.ui.portfolio import Portfolio
@@ -34,7 +35,11 @@ class HomePage(tk.Tk):
         nav_frame.pack(fill="x")
         for link in self.navbar.links:
             tk.Label(
-                nav_frame, text=link, fg="white", bg="#2e2e2e", padx=10
+                nav_frame,
+                text=link,
+                fg="white",
+                bg="#2e2e2e",
+                padx=10
             ).pack(side="left")
 
         # --- DASHBOARD ---
@@ -93,6 +98,8 @@ class HomePage(tk.Tk):
         if "plinko" in game_name.lower() and PlinkoWindow:
             # On transmet le portefeuille pour synchroniser le solde
             PlinkoWindow(self, portfolio=self.portfolio)
+        elif "roulette" in game_name.lower() and RouletteApp:
+            RouletteApp(self, portfolio=self.portfolio)
         else:
             self.show_rules(game_name)
 
