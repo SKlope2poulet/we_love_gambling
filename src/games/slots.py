@@ -15,7 +15,7 @@ class SlotMachineApp(tk.Toplevel):
         self.portfolio = portfolio
         self.balance = self.portfolio.balance
         self.current_bet = 10
-        self.symbols = ["🍒", "🍋", "⭐", "💎", "7️⃣"]
+        self.symbols = ["🍒", "🍋", "⭐", "💎", "7️"]
         self.is_spinning = False
         self.auto_mode = False
         self.auto_spins_remaining = 0
