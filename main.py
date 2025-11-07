@@ -1,4 +1,6 @@
 import tkinter as tk
+from src.games.plinko import PlinkoWindow
+from src.games.slots import SlotMachineApp
 from src.ui.navbar import Navbar
 from src.ui.dashboard import Dashboard
 from src.ui.portfolio import Portfolio
@@ -8,12 +10,6 @@ from src.ui.rules_page import RulesPage
 from src.ui.fake_money_warning import FakeMoneyWarning
 from src.ui.age_verification import AgeVerification
 from src.ui.legal_popup import LegalPopup
-
-# Essayer d’importer Plinko
-try:
-    from src.games.plinko import PlinkoWindow
-except ImportError:
-    PlinkoWindow = None
 
 
 def create_homepage():
@@ -90,9 +86,10 @@ class HomePage(tk.Tk):
     # --- MÉTHODES PRINCIPALES ---
     def open_game(self, game_name):
         """Ouvre le jeu choisi."""
-        if "plinko" in game_name.lower() and PlinkoWindow:
-            # On transmet le portefeuille pour synchroniser le solde
+        if "plinko" in game_name.lower():
             PlinkoWindow(self, portfolio=self.portfolio)
+        elif "slot" in game_name.lower():
+            SlotMachineApp(self, portfolio=self.portfolio)
         else:
             self.show_rules(game_name)
 
