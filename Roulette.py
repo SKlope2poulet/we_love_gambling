@@ -1,13 +1,8 @@
-# roulette_jeu_complet_fr.py
-# Roulette européenne — table centrée, carrés cliquables, jetons centrés,
-# suppression de jeton par clic (mode dédié), historique en bas,
-# et *Gains potentiels* dynamiques.
-# Toutes les fonctions sont francisées et suffixées par _ROULETTE.
-# Aucune dépendance externe.
-
 import random
 import tkinter as tk
 from tkinter import ttk, messagebox
+import math
+from typing import List
 
 # ---------- Modèle (logique) ----------
 
@@ -156,6 +151,28 @@ class Game:
         self.bankroll += net
         self.bets = []
         return n, color, results, net, self.bankroll
+
+# ---------- Fonctions pures pour la roue (testables) ----------
+
+# Ordre officiel de la roue européenne (sens horaire)
+WHEEL_ORDER_EU: List[int] = [
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
+    5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+]
+
+SEG_ANGLE = 360.0 / 37.0  # taille angulaire d'un compartiment
+
+def angle_for_number(num: int) -> float:
+    """
+    Renvoie l'angle (degrés) du centre de segment pour 'num',
+    mesuré *depuis le haut* (0°) en tournant dans le sens horaire.
+    (Fonction pure — sans dépendance UI)
+    """
+    if num not in WHEEL_ORDER_EU:
+        raise ValueError("Numéro invalide pour la roue EU")
+    idx = WHEEL_ORDER_EU.index(num)
+    # 0° = haut (nord). idx=0 => 0°, idx=1 => SEG_ANGLE, etc.
+    return idx * SEG_ANGLE
 
 # ---------- Vue/Table (Canvas cliquable centré) ----------
 
@@ -434,12 +451,119 @@ class TableCanvas(tk.Canvas):
             sel_str = "" if sel is None else str(sel)
         return ("chip", f"chip:{typ}:{sel_str}")
 
+# ---------- Visuel dynamique de la roue ----------
+
+class RouletteWheel(tk.Canvas):
+    """Canvas qui représente une roue européenne avec bille animée (ease-out)."""
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.configure(bg="#143014", highlightthickness=0)
+        self.center = (200, 110)          # centre de la roue
+        self.radius_outer = 100           # rayon externe du ring
+        self.radius_ball = 85             # rayon de la bille
+        self.ball_angle_deg = 0.0         # 0° = haut, sens horaire
+
+        self._static_drawn = False
+        self._ball_item = None
+        self._labels_items = []
+        self._make_static_wheel()
+
+    # ---------- Construction statique ----------
+    def _make_static_wheel(self):
+        if self._static_drawn:
+            return
+        cx, cy = self.center
+        R = self.radius_outer
+
+        # Couronne extérieure
+        self.create_oval(cx-R-8, cy-R-8, cx+R+8, cy+R+8, fill="#0a5f0a", outline="")
+        self.create_oval(cx-R, cy-R, cx+R, cy+R, fill="#222222", outline="#dddddd", width=2)
+
+        # Segments (arcs)
+        for idx, num in enumerate(WHEEL_ORDER_EU):
+            start_deg_canvas = -90 + idx*SEG_ANGLE   # canvas: 0° = est ; -90° = nord
+            extent = SEG_ANGLE
+            color = "#0a990a" if num == 0 else ("#b80000" if num in Roulette().red_numbers else "#111111")
+            self.create_arc(cx-R, cy-R, cx+R, cy+R,
+                            start=start_deg_canvas, extent=extent,
+                            style="pieslice", fill=color, outline="#333333", width=1)
+
+        # Nombres
+        self._labels_items.clear()
+        for idx, num in enumerate(WHEEL_ORDER_EU):
+            # position du texte à mi-rayon
+            ang = math.radians(idx*SEG_ANGLE - 90)  # -90 pour mettre 0° en haut
+            tx = cx + math.cos(ang) * (R - 22)
+            ty = cy + math.sin(ang) * (R - 22)
+            txt = str(num)
+            fill = "white"
+            self._labels_items.append(self.create_text(tx, ty, text=txt, fill=fill, font=("Arial", 9, "bold")))
+
+        # Pointeur fixe (triangle en haut)
+        self.create_polygon(cx-10, cy-R-14, cx+10, cy-R-14, cx, cy-R-2,
+                            fill="#e5d100", outline="#000000", width=1)
+
+        # Bille initiale
+        self._draw_ball()
+        self._static_drawn = True
+
+    def _draw_ball(self):
+        cx, cy = self.center
+        ang = math.radians(self.ball_angle_deg - 90)  # -90 pour nord
+        r = self.radius_ball
+        bx = cx + math.cos(ang) * r
+        by = cy + math.sin(ang) * r
+        # bille
+        if self._ball_item is not None:
+            self.coords(self._ball_item, bx-6, by-6, bx+6, by+6)
+        else:
+            self._ball_item = self.create_oval(bx-6, by-6, bx+6, by+6, fill="white", outline="#000000")
+
+    # ---------- Animation ----------
+    def spin_to(self, target_number: int, duration_ms: int = 2000, extra_turns: float = 3.0):
+        """
+        Anime la bille jusqu'au centre de segment correspondant à 'target_number'.
+        - duration_ms: durée totale de l'animation
+        - extra_turns: nombre de tours complets supplémentaires avant de s'arrêter
+        """
+        if target_number not in WHEEL_ORDER_EU:
+            return
+
+        start = self.ball_angle_deg % 360.0
+        target = angle_for_number(target_number)  # 0° en haut, horaire
+        # delta total à parcourir (toujours positif, tourner dans le sens horaire)
+        total_delta = (360.0*extra_turns + ((target - start) % 360.0))
+
+        steps = max(60, int(duration_ms / 16))  # ~60 fps
+        self._anim_i = 0
+        self._anim_steps = steps
+        self._anim_start = start
+        self._anim_delta = total_delta
+
+        def step():
+            i = self._anim_i
+            n = self._anim_steps
+            if i > n:
+                # Fin — aligner pile sur la cible
+                self.ball_angle_deg = (self._anim_start + self._anim_delta) % 360.0
+                self._draw_ball()
+                return
+            t = i / n
+            # ease-out (cubic)
+            ease = 1 - (1 - t)**3
+            self.ball_angle_deg = (self._anim_start + self._anim_delta * ease) % 360.0
+            self._draw_ball()
+            self._anim_i += 1
+            self.after(int(duration_ms / n), step)
+
+        step()
+
 # ---------- Application ----------
 
 class RouletteApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Roulette (EU) — Table, Carrés, Jetons centrés, Suppression, Gains potentiels")
+        self.title("Roulette (EU) — Table, Carrés, Jetons centrés, Suppression, Gains potentiels, Visuel")
         self.resizable(False, False)
 
         self.game = Game(bankroll=500.0)
@@ -452,6 +576,7 @@ class RouletteApp(tk.Tk):
         # UI
         self.construire_barre_haut_ROULETTE()
         self.construire_table_ROULETTE()
+        self.construire_visuel_roulette_ROULETTE()   # <— NOUVEAU : visuel dynamique entre table et historique
         self.construire_historique_bas_ROULETTE()
 
         self.maj_bankroll_ROULETTE()
@@ -495,9 +620,17 @@ class RouletteApp(tk.Tk):
         self.table = TableCanvas(frame, self, width=900, height=360, bg="#084f08")
         self.table.pack()
 
+    def construire_visuel_roulette_ROULETTE(self):
+        """NOUVEAU : Canvas de roue dynamique placé SOUS la table et AU-DESSUS de l'historique."""
+        box = ttk.LabelFrame(self, text="Roue (animation au lancement)", padding=10)
+        box.grid(row=2, column=0, padx=10, pady=(0,10), sticky="ew")
+        self.wheel = RouletteWheel(box, width=400, height=220)
+        self.wheel.pack()
+
     def construire_historique_bas_ROULETTE(self):
         box = ttk.LabelFrame(self, text="Historique", padding=10)
-        box.grid(row=2, column=0, padx=10, pady=(0,10), sticky="ew")
+        # L'historique descend d'une ligne : il était en row=2, passe en row=3
+        box.grid(row=3, column=0, padx=10, pady=(0,10), sticky="ew")
         self.history = tk.Text(box, width=120, height=12, state="disabled")
         self.history.grid(row=0, column=0)
 
@@ -650,6 +783,13 @@ class RouletteApp(tk.Tk):
         # Vider les jetons (mises consommées)
         self.table.rafraichir_jetons_ROULETTE(self.game.bets)
         self.maj_gains_potentiels_ROULETTE()
+
+        # NOUVEAU : lancer l'animation de la roue jusqu'au numéro sorti
+        try:
+            self.wheel.spin_to(n, duration_ms=2000, extra_turns=3.0)
+        except Exception:
+            # On ne casse rien si le visuel a un souci
+            pass
 
         self.journaliser_ROULETTE(f"Sortie: {n} ({color_fr})")
         for b, gain in results:
