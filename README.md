@@ -12,6 +12,7 @@ Plongez dans un univers de jeux de casino addictifs, testez vos stratégies, et 
 - **Plinko** : Faites tomber la bille et tentez de multiplier vos gains grâce à des multiplicateurs dynamiques.
 - **Mines Tiles** : Découvrez les cases sûres et évitez les bombes pour augmenter vos gains.
 - **Chicken Road** : Progressez à travers des niveaux stratégiques et sécurisez vos gains au bon moment.
+- **Penalty Shootout** : Prenez place sur le terrain et tentez de marquer des buts ! Chaque tir est une occasion de gagner gros en fonction de votre précision et de votre timing.
 
 ### 💰 **Gestion du solde fictif**
 - **Recharger votre solde** : Si vous êtes à court de fonds fictifs, rechargez instantanément pour continuer à jouer.
@@ -21,13 +22,8 @@ Plongez dans un univers de jeux de casino addictifs, testez vos stratégies, et 
 - **Avertissement clair** : Chaque jeu est marqué d'un message "argent fictif – aucune mise réelle" pour garantir que vous jouez en toute sérénité.
 - **Jouer de manière responsable** : Nous vous informons des risques liés aux jeux et vous offrons la possibilité d'ajuster vos limites de jeu.
 
-### 🏆 **Suivi des performances**
-- **Statistiques détaillées** : Mesurez vos résultats avec des informations sur vos mises, gains et le RTP (Return To Player).
-- **Suivi des sessions** : Restez informé sur vos performances de jeu pour affiner vos stratégies.
-
 ### 🚀 **Expérience de jeu fluide**
 - **Interface intuitive** : Profitez d'une navigation facile et agréable entre les différents jeux.
-- **Règles des jeux accessibles** : Avant de parier, consultez directement les règles du jeu sur chaque page pour tout savoir sur le gameplay.
 
 ### 🌍 **Pour tous les joueurs**
 Que vous soyez fan de jeux de hasard ou de stratégie, **We Love Gambling** propose des jeux pour chaque type de joueur, avec des options variées et des mécaniques de jeu immersives.
