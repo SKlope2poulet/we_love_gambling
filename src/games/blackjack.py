@@ -21,3 +21,7 @@ class BlackjackGame:
         card = self.draw()
         self.player_hand.append(card)
         self.last_card_hidden = hide_card
+
+    def stand(self):
+        self.state = "dealer_turn"
+
