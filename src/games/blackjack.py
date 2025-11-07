@@ -15,7 +15,9 @@ class BlackjackGame:
         self.balance -= bet
         self.player_hand = [self.draw(), self.draw()]
 
-    def double(self):
+    def double(self, hide_card=False):
         self.balance -= self.bet
         self.bet *= 2
-        self.player_hand.append(self.draw())
+        card = self.draw()
+        self.player_hand.append(card)
+        self.last_card_hidden = hide_card
