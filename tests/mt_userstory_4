@@ -1,0 +1,25 @@
+# =============================================
+# 💰 USER STORY 4 — Gestion du cash-out
+# =============================================
+
+# ---------- TEST ----------
+def test_cashout_adds_gain_and_stops_game():
+    app = MineTilesApp()
+    app.bet = 10
+    app.multiplier = 2.5
+    app.cashout()
+    assert app.wallet == START_WALLET + 25
+    assert app.game.status == "cashout"
+
+# ---------- CODE ----------
+def cashout(self):
+    """Encaisse le gain actuel et termine la partie."""
+    g = self.game
+    if g.status != "playing":
+        return
+    gain = round(self.bet * self.multiplier, 2)
+    self.wallet += gain
+    g.status = "cashout"
+    self._reveal_all()
+    self.header.config(text=f"💰 Tu encaisses {gain} crédits !", fg=GEM_COLOR)
+    self.info.config(text=f"Nouveau solde : {self.wallet}")
