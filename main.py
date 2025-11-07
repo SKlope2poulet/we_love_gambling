@@ -1,5 +1,6 @@
 import tkinter as tk
 from src.games.plinko import PlinkoWindow
+from src.games.chicken_road import launch_chicken_road
 from src.games.slots import SlotMachineApp
 from src.ui.navbar import Navbar
 from src.ui.dashboard import Dashboard
@@ -90,6 +91,8 @@ class HomePage(tk.Tk):
             PlinkoWindow(self, portfolio=self.portfolio)
         elif "slot" in game_name.lower():
             SlotMachineApp(self, portfolio=self.portfolio)
+        elif "chicken" in game_name.lower():
+            launch_chicken_road(self, portfolio=self.portfolio)
         else:
             self.show_rules(game_name)
 
