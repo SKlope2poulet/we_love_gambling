@@ -25,3 +25,5 @@ class BlackjackGame:
     def stand(self):
         self.state = "dealer_turn"
 
+    def hit(self):
+        self.player_hand.append(self.draw())
