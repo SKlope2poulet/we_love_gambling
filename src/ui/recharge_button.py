@@ -1,27 +1,18 @@
 import tkinter as tk
+from tkinter import messagebox
 
-class RechargeButton(tk.Frame):
+class RechargeButton:
+    """Classe logique du bouton 'Recharger le solde'."""
+
     def __init__(self, parent):
-        super().__init__(parent, bg="#222222")
         self.parent = parent
+        self.label = "💰 Recharger le solde"  # <-- c’est ce qui manquait
 
-        self.button = tk.Button(
-            self,
-            text="🔄 Recharger le solde fictif",
-            bg="#00b894",
-            fg="white",
-            font=("Arial", 11, "bold"),
-            width=25,
-            command=self.recharge_balance
-        )
-        self.button.pack(pady=5)
-
-    def recharge_balance(self):
-        """Recharge le solde via le composant Portfolio s'il existe."""
+    def recharge(self):
+        """Recharge le solde fictif de l'utilisateur."""
         if hasattr(self.parent, "portfolio"):
-            # On recharge en ajoutant 500 € fictifs
-            self.parent.portfolio.balance += 500
-            self.parent.portfolio.update_main_balance()
-        elif hasattr(self.parent, "balance"):
-            # Si pas de portfolio (fallback)
-            self.parent.balance.update_balance(self.parent.balance.balance + 500)
+            # Si un portefeuille existe, on met à jour son solde
+            self.parent.portfolio.balance += 100.0
+            messagebox.showinfo("Solde rechargé", "💸 +100€ ajoutés à votre solde fictif !")
+        else:
+            messagebox.showinfo("Information", "Aucun portefeuille détecté.")
