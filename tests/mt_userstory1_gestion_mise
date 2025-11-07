@@ -1,0 +1,37 @@
+# =============================================
+# 🧩 USER STORY 1 — Gestion de la mise
+# =============================================
+
+# ---------- TESTS ----------
+def test_bet_cannot_be_negative():
+    app = MineTilesApp()
+    app.wallet = 100
+    app.bet_var.set("-5")
+    assert app.bet == 1
+
+def test_bet_cannot_exceed_wallet():
+    app = MineTilesApp()
+    app.wallet = 50
+    app.bet_var.set("999")
+    assert app.bet == 50
+
+def test_bet_updates_on_input():
+    app = MineTilesApp()
+    app.wallet = 100
+    app.bet_var.set("25")
+    assert app.bet == 25
+
+# ---------- CODE ----------
+def update_bet(self, *args):
+    """Relit automatiquement la mise à chaque changement du champ."""
+    try:
+        val = int(self.bet_var.get())
+        if val < 1:
+            val = 1
+        if val > self.wallet:
+            val = self.wallet
+    except ValueError:
+        val = 1
+    self.bet = val
+    self.bet_var.set(str(self.bet))
+    self._update_labels()
