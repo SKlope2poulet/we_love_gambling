@@ -87,12 +87,17 @@ class MineTilesApp(tk.Toplevel):
         controls = tk.Frame(self, bg=BG)
         controls.pack(pady=5)
 
-        # Entrée directe mise
-        tk.Label(controls, text="💰 Mise :", bg=BG, fg=TEXT_COLOR, font=BTN_FONT).grid(row=0, column=0, padx=5)
-        self.bet_var = tk.StringVar(value=str(self.bet))
-        self.bet_entry = tk.Entry(controls, width=6, font=BTN_FONT, justify="center", textvariable=self.bet_var)
-        self.bet_entry.grid(row=0, column=1, padx=5)
-        self.bet_var.trace_add("write", self.update_bet)
+        # --- Ajustement de la mise avec + et - ---
+        bet_frame = tk.Frame(controls, bg=BG)
+        bet_frame.grid(row=0, column=0, columnspan=4, pady=4)
+
+        tk.Label(bet_frame, text="💰 Mise :", bg=BG, fg=TEXT_COLOR, font=BTN_FONT).grid(row=0, column=0, padx=5)
+
+        self.bet_label = tk.Label(bet_frame, text=f"{self.bet}", bg=BG, fg=TEXT_COLOR, font=BTN_FONT, width=5)
+        self.bet_label.grid(row=0, column=1, padx=5)
+
+        tk.Button(bet_frame, text=" - ", font=BTN_FONT, command=self.dec_bet).grid(row=0, column=2, padx=2)
+        tk.Button(bet_frame, text=" + ", font=BTN_FONT, command=self.inc_bet).grid(row=0, column=3, padx=2)
 
         # Nombre de bombes
         self.bomb_label = tk.Label(controls, text=f"💣 Bombes : {self.bombs}", bg=BG, fg=TEXT_COLOR, font=BTN_FONT)
@@ -114,18 +119,17 @@ class MineTilesApp(tk.Toplevel):
                 self.portfolio.update_display()
 
     # ---------- LOGIQUE ----------
-    def update_bet(self, *args):
-        try:
-            val = int(self.bet_var.get())
-            if val < 1:
-                val = 1
-            if val > self.wallet:
-                val = self.wallet
-        except ValueError:
-            val = 1
-        self.bet = val
-        self.bet_var.set(str(self.bet))
-        self._update_labels()
+    def inc_bet(self):
+        """Augmente la mise de 1 sans dépasser le solde."""
+        if self.bet < self.wallet:
+            self.bet += 1
+            self._update_labels()
+
+    def dec_bet(self):
+        """Diminue la mise de 1 sans descendre sous 1."""
+        if self.bet > 1:
+            self.bet -= 1
+            self._update_labels()
 
     def click(self, r, c):
         g = self.game
@@ -234,6 +238,8 @@ class MineTilesApp(tk.Toplevel):
     def _update_labels(self):
         self.bomb_label.config(text=f"💣 Bombes : {self.bombs}")
         self.info.config(text=f"Solde : {self.wallet} | Mise : {self.bet} | x{self.multiplier:.2f}")
+        if hasattr(self, "bet_label"):
+            self.bet_label.config(text=f"{self.bet}")
         self.sync_portfolio()
 
 
