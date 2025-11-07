@@ -12,7 +12,6 @@ Plongez dans un univers de jeux de casino addictifs, testez vos stratégies, et 
 - **Plinko** : Faites tomber la bille et tentez de multiplier vos gains grâce à des multiplicateurs dynamiques.
 - **Mines Tiles** : Découvrez les cases sûres et évitez les bombes pour augmenter vos gains.
 - **Chicken Road** : Progressez à travers des niveaux stratégiques et sécurisez vos gains au bon moment.
-- **Penalty Shootout** : Prenez place sur le terrain et tentez de marquer des buts ! Chaque tir est une occasion de gagner gros en fonction de votre précision et de votre timing.
 
 ### 💰 **Gestion du solde fictif**
 - **Recharger votre solde** : Si vous êtes à court de fonds fictifs, rechargez instantanément pour continuer à jouer.
