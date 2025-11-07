@@ -27,3 +27,7 @@ class BlackjackGame:
 
     def hit(self):
         self.player_hand.append(self.draw())
+
+    def autoplay(self, rounds=1):
+        for _ in range(rounds):
+            self.play_round()
