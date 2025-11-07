@@ -1,0 +1,37 @@
+# =============================================
+# 🎯 USER STORY 5 — Calcul du multiplicateur
+# =============================================
+
+# ---------- TESTS ----------
+def test_multiplier_increases_after_reveal():
+    app = MineTilesApp()
+    app.game.revealed_count = 1
+    m1 = app._calc_multiplier()
+    app.game.revealed_count = 3
+    m2 = app._calc_multiplier()
+    assert m2 > m1
+
+def test_more_bombs_gives_higher_multiplier():
+    app = MineTilesApp()
+    app.bombs = 3
+    low = app._calc_multiplier()
+    app.bombs = 15
+    high = app._calc_multiplier()
+    assert high > low
+
+# ---------- CODE ----------
+def _calc_multiplier(self):
+    """Calcule le multiplicateur en fonction du risque."""
+    total = ROWS * COLS
+    bombs = self.bombs
+    revealed = self.game.revealed_count
+    prob = 1.0
+    safe = total - bombs
+    for i in range(revealed):
+        prob *= (safe - i) / (total - i)
+    if prob == 0:
+        prob = 0.0001
+    base_mult = (1 / prob) ** 0.25
+    risk_bonus = 1 + (bombs / total) * 2.0
+    mult = base_mult * risk_bonus
+    return round(mult, 2)
