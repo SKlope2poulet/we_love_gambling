@@ -1,0 +1,28 @@
+# =============================================
+# 💣 USER STORY 2 — Gestion de la difficulté
+# =============================================
+
+# ---------- TESTS ----------
+def test_change_bombs_starts_new_game():
+    app = MineTilesApp()
+    old_game = app.game
+    app.bombs = 3
+    app.new_game_on_bomb_change()
+    assert app.game is not old_game
+
+def test_more_bombs_increase_risk_bonus():
+    app = MineTilesApp()
+    low = app._calc_multiplier()
+    app.bombs = 15
+    app.new_game_on_bomb_change()
+    high = app._calc_multiplier()
+    assert high > low
+
+# ---------- CODE ----------
+def new_game_on_bomb_change(self):
+    """Relance une partie quand le nombre de bombes change."""
+    self.multiplier = 1.0
+    self.game = MineTilesGame(self.bombs)
+    self._update_board()
+    self._update_labels()
+    self.header.config(text=f"💣 Nouvelle partie avec {self.bombs} bombes !", fg="#7aa2f7")
