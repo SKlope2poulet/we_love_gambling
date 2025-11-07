@@ -1,0 +1,30 @@
+# =============================================
+# 🖥️ USER STORY 3 — Interface graphique dynamique
+# =============================================
+
+# ---------- TEST ----------
+def test_ui_creates_correct_number_of_buttons():
+    app = MineTilesApp()
+    total_buttons = sum(len(row) for row in app.buttons)
+    assert total_buttons == app.game.rows * app.game.cols
+
+# ---------- CODE ----------
+def _setup_ui(self):
+    """Construit la fenêtre Tkinter et ses éléments."""
+    self.header = tk.Label(self, text="", bg=BG, fg=TEXT_COLOR, font=("Consolas", 14))
+    self.header.pack(pady=5)
+
+    self.info = tk.Label(self, text="", bg=BG, fg=TEXT_COLOR, font=("Consolas", 12))
+    self.info.pack()
+
+    self.board = tk.Frame(self, bg=BG)
+    self.board.pack(pady=10)
+    self.buttons = []
+    for r in range(ROWS):
+        row = []
+        for c in range(COLS):
+            b = tk.Button(self.board, text="", width=5, height=2, bg=COVER, fg=TEXT_COLOR,
+                          font=BTN_FONT, command=lambda rr=r, cc=c: self.click(rr, cc))
+            b.grid(row=r, column=c, padx=3, pady=3)
+            row.append(b)
+        self.buttons.append(row)
