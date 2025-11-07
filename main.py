@@ -1,4 +1,5 @@
 import tkinter as tk
+from src.games.mine_tiles import launch_mine_tiles
 from src.games.plinko import PlinkoWindow
 from src.games.chicken_road import launch_chicken_road
 from src.games.slots import SlotMachineApp
@@ -93,6 +94,8 @@ class HomePage(tk.Tk):
             SlotMachineApp(self, portfolio=self.portfolio)
         elif "chicken" in game_name.lower():
             launch_chicken_road(self, portfolio=self.portfolio)
+        elif "mine" in game_name.lower():
+            launch_mine_tiles(self, portfolio=self.portfolio)
         else:
             self.show_rules(game_name)
 
